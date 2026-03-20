@@ -33,17 +33,14 @@ margin: 0 auto;
     align-items: center;
     padding: 50px;
 }
-    .buttons{
-        display: flex;
-    }
 .liquid-btn {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 220px;
-    height: 64px;
-    font-size: 17px;
+    width: clamp(140px, 50vw, 220px);
+    height: clamp(44px, 8vw, 64px);
+    font-size: clamp(13px, 2vw, 17px);
     font-weight: 600;
     letter-spacing: 0.3px;
     color: white;
@@ -55,7 +52,7 @@ margin: 0 auto;
     background: linear-gradient(135deg, #ff4f87, #d6336c, #a61e4d);
     box-shadow: 0 12px 28px rgba(166, 30, 77, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 30px;
+    margin: clamp(16px, 4vw, 30px);
 }
 
 .liquid-btn:hover {
@@ -110,7 +107,21 @@ margin: 0 auto;
         border-radius: 42% 58% 63% 37% / 40% 43% 57% 60%;
     }
 }
-#runaway-btn {
+
+/* Button container */
+.button {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 480px) {
+    .button {
+        flex-direction: column;
+    }
+}#runaway-btn {
     position: relative; /* change from absolute */
     transition: left 0.25s ease, top 0.25s ease;
 }
