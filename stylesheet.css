@@ -111,10 +111,6 @@ margin: 0 auto;
 /* Button container */
 .button {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
 }
 
 @media (max-width: 480px) {
