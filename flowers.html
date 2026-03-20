@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Blooming Lilies</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap');
+
+  :root {
+    --bg: #0a0c0f;
+    --stem: #2d4a2a;
+    --petal-1: #f2c4c4;
+    --petal-2: #e8889e;
+    --petal-3: #d45e7a;
+    --petal-accent: #f9e0e8;
+    --stamen: #f5d76e;
+    --stamen-tip: #e8a020;
+    --leaf: #2e5c2a;
+    --leaf-light: #4a8c44;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { width: 100%; height: 100%; }
+
+  body {
+    background: var(--bg);
+    min-height: 100svh;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .bg-glow {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 100%, rgba(180,80,100,0.14) 0%, transparent 70%),
+      radial-gradient(ellipse 45% 35% at 25% 85%,  rgba(80,120,60,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 45% 35% at 75% 85%,  rgba(80,120,60,0.09) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .title {
+    position: fixed;
+    top: clamp(16px, 4vw, 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(242,196,196,0.55);
+    font-size: clamp(0.7rem, 2.2vw, 1.15rem);
+    font-weight: 300; font-style: italic;
+    letter-spacing: 0.35em; text-transform: lowercase; white-space: nowrap;
+    animation: titleFade 3s ease forwards; z-index: 10;
+    text-align: center;
+  }
+  @keyframes titleFade {
+    from { opacity:0; transform: translateX(-50%) translateY(8px); }
+    to   { opacity:1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /*
+   * CENTERING STRATEGY
+   * ------------------
+   * The design canvas is 700×580. We scale it with CSS transform.
+   * .scene-wrapper is fixed to the bottom of the viewport, full width.
+   * .scene sits inside it at position absolute, centred with left:50%.
+   * transform-origin is bottom center.
+   * JS applies: transform = translateX(-50%) scale(S)
+   *   — translateX(-50%) shifts left by 50% of the UNSCALED 700px = 350px,
+   *     perfectly centring it before scale is applied.
+   *   — scale(S) then zooms in/out around the bottom-centre point.
+   * The wrapper height is set to scaledH so it doesn't collapse.
+   */
+  .scene-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;          /* always full viewport width */
+    z-index: 1;
+    /* height set by JS */
+  }
+
+  .scene {
+    position: absolute;
+    bottom: 0;
+    left: 50%;            /* anchor horizontally to viewport centre */
+    transform-origin: bottom center;
+    /* JS sets: transform: translateX(-50%) scale(S) */
+    width: 700px;
+    height: 580px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  /* ── Ground ── */
+  .ground {
+    position: absolute; bottom: 0; left: -100px; right: -100px; height: 60px;
+    background: linear-gradient(to top, rgba(20,30,25,0.9), transparent);
+    border-radius: 50% 50% 0 0 / 20px 20px 0 0;
+  }
+
+  /* ── Mist ── */
+  .mist-layer {
+    position: absolute; bottom: 30px; left: -50px; right: -50px; height: 80px;
+    background: radial-gradient(ellipse 80% 100% at 50% 100%, rgba(255,220,230,0.06) 0%, transparent 70%);
+    animation: mistDrift 8s ease-in-out infinite alternate;
+  }
+  @keyframes mistDrift {
+    from { opacity:.4; transform: scaleX(.95); }
+    to   { opacity:1;  transform: scaleX(1.05); }
+  }
+
+  /* ── Lily ── */
+  .lily { position: relative; display: flex; align-items: flex-end; justify-content: center; }
+  .lily-1 { animation: plantRise 1.2s cubic-bezier(.2,.8,.4,1) both; }
+  .lily-2 { animation: plantRise 1.5s cubic-bezier(.2,.8,.4,1) .3s both; }
+  .lily-3 { animation: plantRise 1.2s cubic-bezier(.2,.8,.4,1) .6s both; }
+  @keyframes plantRise {
+    from { opacity:0; transform: translateY(40px) scaleY(.6); }
+    to   { opacity:1; transform: translateY(0) scaleY(1); }
+  }
+
+  .lily svg { overflow: visible; filter: drop-shadow(0 8px 24px rgba(200,80,100,.18)); }
+
+  .stem-path { stroke: var(--stem); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+
+  .leaf-shape       { fill: var(--leaf);       transform-origin: bottom center; animation: leafSway 6s ease-in-out infinite; }
+  .leaf-shape.right { animation-direction: alternate-reverse; }
+  .leaf-shape-light { fill: var(--leaf-light); opacity: .4; }
+  @keyframes leafSway {
+    0%,100% { transform: rotate(-2deg); }
+    50%     { transform: rotate(3deg); }
+  }
+
+  .petal { transform-origin: 50% 100%; animation: bloomPetal 1.8s cubic-bezier(.2,.9,.4,1) both; }
+  .p1{animation-delay:1.0s} .p2{animation-delay:1.15s} .p3{animation-delay:1.3s}
+  .p4{animation-delay:1.15s} .p5{animation-delay:1.0s} .p6{animation-delay:1.3s}
+  @keyframes bloomPetal {
+    from { transform: scaleY(.05) scaleX(.3); opacity:0; }
+    60%  { opacity:1; }
+    to   { transform: scaleY(1) scaleX(1); opacity:1; }
+  }
+  .lily-2 .p1{animation-delay:1.3s}  .lily-2 .p2{animation-delay:1.45s} .lily-2 .p3{animation-delay:1.6s}
+  .lily-2 .p4{animation-delay:1.45s} .lily-2 .p5{animation-delay:1.3s}  .lily-2 .p6{animation-delay:1.6s}
+  .lily-3 .p1{animation-delay:1.6s}  .lily-3 .p2{animation-delay:1.75s} .lily-3 .p3{animation-delay:1.9s}
+  .lily-3 .p4{animation-delay:1.75s} .lily-3 .p5{animation-delay:1.6s}  .lily-3 .p6{animation-delay:1.9s}
+
+  .petal-outer { fill: var(--petal-2); }
+  .petal-inner { fill: var(--petal-1); opacity: .7; }
+  .petal-vein  { stroke: var(--petal-3); stroke-width: .8; fill: none; opacity: .5; }
+  .petal-glow  { fill: var(--petal-accent); opacity: .25; }
+
+  .stamen-group { transform-origin: 50% 100%; animation: stamenRise .8s cubic-bezier(.3,1,.5,1) 2.4s both; }
+  .lily-2 .stamen-group { animation-delay: 2.7s; }
+  .lily-3 .stamen-group { animation-delay: 3.0s; }
+  @keyframes stamenRise {
+    from { transform: scaleY(0); opacity:0; }
+    to   { transform: scaleY(1); opacity:1; }
+  }
+  .stamen-line { stroke: var(--stamen); stroke-width: 1.2; fill: none; }
+  .stamen-dot  { fill: var(--stamen-tip); }
+
+  .bud-petal     { fill: var(--petal-2); transform-origin: 50% 100%; animation: budSway 7s ease-in-out infinite; }
+  .bud-petal.alt { animation-direction: alternate-reverse; }
+  @keyframes budSway {
+    0%,100% { transform: rotate(-1.5deg); }
+    50%     { transform: rotate(1.5deg); }
+  }
+
+  .pollen { position:absolute; border-radius:50%; background:var(--stamen); opacity:0; animation:pollenFloat linear infinite; }
+  @keyframes pollenFloat {
+    0%   { opacity:0;  transform:translate(0,0) scale(1); }
+    10%  { opacity:.8; }
+    90%  { opacity:.4; }
+    100% { opacity:0;  transform:translate(var(--dx),var(--dy)) scale(.3); }
+  }
+
+  .lily-1 svg { animation: gentleSway  9s ease-in-out 0s infinite;         transform-origin: bottom center; }
+  .lily-2 svg { animation: gentleSway 11s ease-in-out 1s infinite reverse; transform-origin: bottom center; }
+  .lily-3 svg { animation: gentleSway  8s ease-in-out 2s infinite;         transform-origin: bottom center; }
+  @keyframes gentleSway {
+    0%,100% { transform: rotate(-1deg); }
+    50%     { transform: rotate(1.2deg); }
+  }
+
+  .firefly {
+    position: fixed; width:3px; height:3px; border-radius:50%;
+    background: rgba(255,240,180,.9);
+    box-shadow: 0 0 6px 2px rgba(255,230,120,.5);
+    animation: fireflyAnim linear infinite;
+    z-index:5; pointer-events:none;
+  }
+  @keyframes fireflyAnim {
+    0%   { opacity:0; transform:translate(0,0); }
+    20%  { opacity:1; }
+    80%  { opacity:.8; }
+    100% { opacity:0; transform:translate(var(--ffx),var(--ffy)); }
+  }
+
+  @media (max-height:500px) and (orientation:landscape) {
+    .title { top:8px; font-size:.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="title">Je savais que tu m’aimais bien. </br>br>Tu as dit pas de fleurs, mais j’en ai fait pour toi.
+</div>
+
+<div class="firefly" style="left:12%;bottom:52%;--ffx:40px;--ffy:-80px;animation-duration:7s;animation-delay:0s;"></div>
+<div class="firefly" style="left:30%;bottom:68%;--ffx:-30px;--ffy:-60px;animation-duration:9s;animation-delay:2s;"></div>
+<div class="firefly" style="left:62%;bottom:62%;--ffx:50px;--ffy:-70px;animation-duration:8s;animation-delay:4s;"></div>
+<div class="firefly" style="left:78%;bottom:48%;--ffx:-20px;--ffy:-90px;animation-duration:6s;animation-delay:1s;"></div>
+<div class="firefly" style="left:50%;bottom:78%;--ffx:35px;--ffy:-50px;animation-duration:11s;animation-delay:3s;"></div>
+
+<div class="scene-wrapper">
+  <div class="scene">
+    <div class="mist-layer"></div>
+    <div class="ground"></div>
+
+    <!-- LILY 1 -->
+    <div class="lily lily-1" style="margin-right:-30px;z-index:1;">
+      <svg width="160" height="480" viewBox="0 0 160 480">
+        <path class="stem-path" d="M80,480 C78,420 76,360 80,300 C84,240 80,180 80,140"/>
+        <g transform="translate(80,340)">
+          <path class="leaf-shape"       d="M0,0 C-8,-12 -30,-30 -50,-20 C-38,-10 -20,0 0,0Z"/>
+          <path class="leaf-shape-light" d="M0,0 C-5,-8 -20,-20 -35,-14 C-25,-6 -12,0 0,0Z"/>
+        </g>
+        <g transform="translate(80,390)">
+          <path class="leaf-shape right" d="M0,0 C8,-10 32,-26 52,-18 C40,-8 22,0 0,0Z"/>
+          <path class="leaf-shape-light" d="M0,0 C5,-6 22,-18 37,-12 C28,-5 15,0 0,0Z"/>
+        </g>
+        <g transform="translate(80,138)">
+          <g class="petal p4"><ellipse class="petal-outer" cx="0" cy="-32" rx="13" ry="36" transform="rotate(120)"/><ellipse class="petal-glow" cx="0" cy="-26" rx="7" ry="22" transform="rotate(120)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-42" transform="rotate(120)"/></g>
+          <g class="petal p5"><ellipse class="petal-outer" cx="0" cy="-32" rx="13" ry="36" transform="rotate(240)"/><ellipse class="petal-glow" cx="0" cy="-26" rx="7" ry="22" transform="rotate(240)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-42" transform="rotate(240)"/></g>
+          <g class="petal p6"><ellipse class="petal-outer" cx="0" cy="-32" rx="13" ry="36" transform="rotate(360)"/><ellipse class="petal-glow" cx="0" cy="-26" rx="7" ry="22" transform="rotate(360)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-42" transform="rotate(360)"/></g>
+          <g class="petal p1"><ellipse class="petal-inner" cx="0" cy="-34" rx="12" ry="38" transform="rotate(60)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-44" transform="rotate(60)"/></g>
+          <g class="petal p2"><ellipse class="petal-inner" cx="0" cy="-34" rx="12" ry="38" transform="rotate(180)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-44" transform="rotate(180)"/></g>
+          <g class="petal p3"><ellipse class="petal-inner" cx="0" cy="-34" rx="12" ry="38" transform="rotate(300)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-44" transform="rotate(300)"/></g>
+          <g class="stamen-group">
+            <line class="stamen-line" x1="0" y1="0" x2="-8" y2="-28"/><line class="stamen-line" x1="0" y1="0" x2="9" y2="-26"/><line class="stamen-line" x1="0" y1="0" x2="0" y2="-30"/><line class="stamen-line" x1="0" y1="0" x2="-5" y2="-24"/><line class="stamen-line" x1="0" y1="0" x2="5" y2="-22"/>
+            <circle class="stamen-dot" cx="-8" cy="-29" r="2.5"/><circle class="stamen-dot" cx="9" cy="-27" r="2.5"/><circle class="stamen-dot" cx="0" cy="-31" r="2.5"/><circle class="stamen-dot" cx="-5" cy="-25" r="2"/><circle class="stamen-dot" cx="5" cy="-23" r="2"/>
+          </g>
+        </g>
+        <g transform="translate(94,220) rotate(20)">
+          <line stroke="#2d4a2a" stroke-width="2.5" x1="0" y1="0" x2="0" y2="-40"/>
+          <g transform="translate(0,-40)">
+            <path class="bud-petal" d="M0,0 C-5,-8 -6,-22 0,-30 C6,-22 5,-8 0,0Z"/>
+            <path class="bud-petal alt" d="M0,0 C5,-8 7,-22 2,-28 C-2,-22 -3,-8 0,0Z" transform="rotate(40)"/>
+            <path class="bud-petal" d="M0,0 C-5,-8 -7,-22 -2,-28 C2,-22 3,-8 0,0Z" transform="rotate(-40)"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- LILY 2 -->
+    <div class="lily lily-2" style="z-index:3;">
+      <svg width="180" height="540" viewBox="0 0 180 540">
+        <path class="stem-path" stroke-width="4" d="M90,540 C88,470 86,400 90,340 C94,280 88,200 90,155"/>
+        <g transform="translate(90,390)"><path class="leaf-shape" d="M0,0 C-10,-14 -36,-36 -62,-24 C-46,-12 -25,0 0,0Z"/><path class="leaf-shape-light" d="M0,0 C-6,-10 -24,-24 -44,-16 C-32,-8 -16,0 0,0Z"/></g>
+        <g transform="translate(90,450)"><path class="leaf-shape right" d="M0,0 C10,-12 38,-32 60,-22 C46,-10 26,0 0,0Z"/><path class="leaf-shape-light" d="M0,0 C6,-8 26,-22 42,-15 C32,-6 18,0 0,0Z"/></g>
+        <g transform="translate(90,310)"><path class="leaf-shape" d="M0,0 C8,-10 28,-24 46,-16 C34,-6 18,0 0,0Z"/></g>
+        <g transform="translate(90,153)">
+          <g class="petal p4"><ellipse class="petal-outer" cx="0" cy="-38" rx="15" ry="42" transform="rotate(120)"/><ellipse class="petal-glow" cx="0" cy="-30" rx="8" ry="26" transform="rotate(120)"/><path class="petal-vein" d="M0,0 C-3,-20 -1,-34 0,-50" transform="rotate(120)"/></g>
+          <g class="petal p5"><ellipse class="petal-outer" cx="0" cy="-38" rx="15" ry="42" transform="rotate(240)"/><ellipse class="petal-glow" cx="0" cy="-30" rx="8" ry="26" transform="rotate(240)"/><path class="petal-vein" d="M0,0 C-3,-20 -1,-34 0,-50" transform="rotate(240)"/></g>
+          <g class="petal p6"><ellipse class="petal-outer" cx="0" cy="-38" rx="15" ry="42" transform="rotate(0)"/><ellipse class="petal-glow" cx="0" cy="-30" rx="8" ry="26" transform="rotate(0)"/><path class="petal-vein" d="M0,0 C-3,-20 -1,-34 0,-50" transform="rotate(0)"/></g>
+          <g class="petal p1"><ellipse class="petal-inner" cx="0" cy="-40" rx="14" ry="44" transform="rotate(60)"/><path class="petal-vein" d="M0,0 C2,-22 0,-38 -1,-52" transform="rotate(60)"/></g>
+          <g class="petal p2"><ellipse class="petal-inner" cx="0" cy="-40" rx="14" ry="44" transform="rotate(180)"/><path class="petal-vein" d="M0,0 C2,-22 0,-38 -1,-52" transform="rotate(180)"/></g>
+          <g class="petal p3"><ellipse class="petal-inner" cx="0" cy="-40" rx="14" ry="44" transform="rotate(300)"/><path class="petal-vein" d="M0,0 C2,-22 0,-38 -1,-52" transform="rotate(300)"/></g>
+          <g class="stamen-group">
+            <line class="stamen-line" x1="0" y1="0" x2="-10" y2="-32"/><line class="stamen-line" x1="0" y1="0" x2="11" y2="-30"/><line class="stamen-line" x1="0" y1="0" x2="0" y2="-36"/><line class="stamen-line" x1="0" y1="0" x2="-6" y2="-28"/><line class="stamen-line" x1="0" y1="0" x2="6" y2="-26"/><line class="stamen-line" x1="0" y1="0" x2="-3" y2="-34"/>
+            <circle class="stamen-dot" cx="-10" cy="-33" r="3"/><circle class="stamen-dot" cx="11" cy="-31" r="3"/><circle class="stamen-dot" cx="0" cy="-37" r="3"/><circle class="stamen-dot" cx="-6" cy="-29" r="2.5"/><circle class="stamen-dot" cx="6" cy="-27" r="2.5"/><circle class="stamen-dot" cx="-3" cy="-35" r="2"/>
+          </g>
+        </g>
+      </svg>
+      <div class="pollen" style="width:4px;height:4px;left:calc(50% - 5px);bottom:380px;--dx:30px;--dy:-60px;animation-duration:4s;animation-delay:3s;"></div>
+      <div class="pollen" style="width:3px;height:3px;left:calc(50% + 8px);bottom:385px;--dx:-25px;--dy:-70px;animation-duration:5s;animation-delay:3.8s;"></div>
+      <div class="pollen" style="width:3px;height:3px;left:50%;bottom:375px;--dx:15px;--dy:-80px;animation-duration:6s;animation-delay:4.5s;"></div>
+    </div>
+
+    <!-- LILY 3 -->
+    <div class="lily lily-3" style="margin-left:-30px;z-index:2;">
+      <svg width="155" height="460" viewBox="0 0 155 460">
+        <path class="stem-path" d="M75,460 C73,400 71,340 76,280 C81,220 78,165 82,130"/>
+        <g transform="translate(76,300)"><path class="leaf-shape" d="M0,0 C-9,-12 -32,-28 -52,-18 C-38,-8 -20,0 0,0Z"/><path class="leaf-shape-light" d="M0,0 C-5,-8 -22,-19 -36,-12 C-26,-5 -13,0 0,0Z"/></g>
+        <g transform="translate(76,360)"><path class="leaf-shape right" d="M0,0 C9,-11 34,-28 54,-18 C40,-8 22,0 0,0Z"/></g>
+        <g transform="translate(82,128) rotate(12)">
+          <g class="petal p4"><ellipse class="petal-outer" cx="0" cy="-33" rx="13" ry="37" transform="rotate(120)"/><ellipse class="petal-glow" cx="0" cy="-27" rx="7" ry="23" transform="rotate(120)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-43" transform="rotate(120)"/></g>
+          <g class="petal p5"><ellipse class="petal-outer" cx="0" cy="-33" rx="13" ry="37" transform="rotate(240)"/><ellipse class="petal-glow" cx="0" cy="-27" rx="7" ry="23" transform="rotate(240)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-43" transform="rotate(240)"/></g>
+          <g class="petal p6"><ellipse class="petal-outer" cx="0" cy="-33" rx="13" ry="37" transform="rotate(360)"/><ellipse class="petal-glow" cx="0" cy="-27" rx="7" ry="23" transform="rotate(360)"/><path class="petal-vein" d="M0,0 C-2,-18 -1,-30 0,-43" transform="rotate(360)"/></g>
+          <g class="petal p1"><ellipse class="petal-inner" cx="0" cy="-35" rx="12" ry="39" transform="rotate(60)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-45" transform="rotate(60)"/></g>
+          <g class="petal p2"><ellipse class="petal-inner" cx="0" cy="-35" rx="12" ry="39" transform="rotate(180)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-45" transform="rotate(180)"/></g>
+          <g class="petal p3"><ellipse class="petal-inner" cx="0" cy="-35" rx="12" ry="39" transform="rotate(300)"/><path class="petal-vein" d="M0,0 C1,-20 0,-32 -1,-45" transform="rotate(300)"/></g>
+          <g class="stamen-group">
+            <line class="stamen-line" x1="0" y1="0" x2="-9" y2="-28"/><line class="stamen-line" x1="0" y1="0" x2="10" y2="-26"/><line class="stamen-line" x1="0" y1="0" x2="0" y2="-32"/><line class="stamen-line" x1="0" y1="0" x2="-5" y2="-24"/><line class="stamen-line" x1="0" y1="0" x2="5" y2="-22"/>
+            <circle class="stamen-dot" cx="-9" cy="-29" r="2.5"/><circle class="stamen-dot" cx="10" cy="-27" r="2.5"/><circle class="stamen-dot" cx="0" cy="-33" r="2.5"/><circle class="stamen-dot" cx="-5" cy="-25" r="2"/><circle class="stamen-dot" cx="5" cy="-23" r="2"/>
+          </g>
+        </g>
+        <g transform="translate(63,210) rotate(-18)">
+          <line stroke="#2d4a2a" stroke-width="2" x1="0" y1="0" x2="0" y2="-32"/>
+          <g transform="translate(0,-32)">
+            <path class="bud-petal" d="M0,0 C-4,-7 -5,-19 0,-26 C5,-19 4,-7 0,0Z"/>
+            <path class="bud-petal alt" d="M0,0 C4,-7 6,-18 2,-24 C-1,-18 -2,-7 0,0Z" transform="rotate(35)"/>
+            <path class="bud-petal" d="M0,0 C-4,-7 -6,-18 -2,-24 C1,-18 2,-7 0,0Z" transform="rotate(-35)"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const DESIGN_W = 700, DESIGN_H = 580;
+  const wrapper = document.querySelector('.scene-wrapper');
+  const scene   = document.querySelector('.scene');
+
+  function fitScene() {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const availH = vh - Math.max(50, vh * 0.1);
+
+    let scale = Math.min(vw / DESIGN_W, availH / DESIGN_H);
+    scale = Math.min(scale, 1); // never upscale on large screens
+
+    const scaledH = Math.round(DESIGN_H * scale);
+
+    // Wrapper height keeps the fixed-positioned element from collapsing
+    wrapper.style.height = scaledH + 'px';
+
+    // translateX(-50%) centres the 700px canvas on the left:50% anchor point.
+    // scale() then zooms it uniformly from the bottom-centre.
+    scene.style.transform = `translateX(-50%) scale(${scale})`;
+  }
+
+  fitScene();
+  window.addEventListener('resize', fitScene);
+  window.addEventListener('orientationchange', () => setTimeout(fitScene, 150));
+</script>
+</body>
+</html>

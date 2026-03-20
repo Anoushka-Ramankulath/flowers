@@ -1,0 +1,116 @@
+body{
+    background-color: #f4c2c2;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+}
+.main-div{
+    text-align: center;
+   border: black 1px solid;
+    max-width: 80%;
+    width: 600px;
+    max-height: 80%;
+    height: 600px;
+    margin: 0 auto;
+        position: relative;
+    overflow: visible; 
+    /*padding: 50px 100px;*/
+    
+}
+.first-div{
+    background-color: #e75480;
+    display: flex;
+    justify-content: center;
+    padding: 50px;
+    border-bottom: black 1px solid;
+}
+.second-div{
+margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px;
+}
+    .buttons{
+        display: flex;
+    }
+.liquid-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    height: 64px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff4f87, #d6336c, #a61e4d);
+    box-shadow: 0 12px 28px rgba(166, 30, 77, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 30px;
+}
+
+.liquid-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px rgba(166, 30, 77, 0.4);
+}
+
+.liquid-btn span {
+    position: relative;
+    z-index: 2;
+}
+
+.liquid-btn::before,
+.liquid-btn::after {
+    content: "";
+    position: absolute;
+    width: 180%;
+    height: 180%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 40%;
+    background: rgba(255, 255, 255, 0.14);
+    animation: morph 8s linear infinite;
+}
+
+.liquid-btn::after {
+    background: rgba(255, 255, 255, 0.09);
+    animation-duration: 11s;
+    animation-direction: reverse;
+}
+
+@keyframes morph {
+    0% {
+        transform: translate(-50%, -52%) rotate(0deg);
+        border-radius: 42% 58% 63% 37% / 40% 43% 57% 60%;
+    }
+    25% {
+        transform: translate(-50%, -48%) rotate(90deg);
+        border-radius: 58% 42% 50% 50% / 55% 38% 62% 45%;
+    }
+    50% {
+        transform: translate(-50%, -52%) rotate(180deg);
+        border-radius: 36% 64% 41% 59% / 52% 60% 40% 48%;
+    }
+    75% {
+        transform: translate(-50%, -48%) rotate(270deg);
+        border-radius: 61% 39% 57% 43% / 38% 53% 47% 62%;
+    }
+    100% {
+        transform: translate(-50%, -52%) rotate(360deg);
+        border-radius: 42% 58% 63% 37% / 40% 43% 57% 60%;
+    }
+}
+#runaway-btn {
+    position: relative; /* change from absolute */
+    transition: left 0.25s ease, top 0.25s ease;
+}

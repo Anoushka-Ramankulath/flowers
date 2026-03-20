@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="stylesheet.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hahahaha</title>
+</head>
+<body>
+<div class="main-div">
+    <div class="first-div">
+                <h1>Salut Justin!</h1>
+    </div>
+        <div class="second-div">
+            <p>je t'aime bien &#128151</p>
+            <p>Est-ce que tu voudrais aller à un rencard avec moi, mon Cœur ?</p> 
+            <div class="buttons">
+                <button class="liquid-btn" id="yes-btn"onclick="window.location.href='flowers.html';"><span>oui, bien sûr</span>
+            </button>
+            <button class="liquid-btn" id="runaway-btn">non, je ne t'aime pas</button>
+            </div>
+        </div>
+</div>
+<script>
+const btn = document.querySelector('#runaway-btn');
+
+let currentX = 0;
+let currentY = 0;
+const limit = 120;
+
+btn.style.position = 'relative';
+btn.style.left = '0px';
+btn.style.top = '0px';
+
+function moveButton() {
+    let moveX = (Math.random() - 0.5) * 120;
+    let moveY = (Math.random() - 0.5) * 120;
+
+    currentX = Math.max(-limit, Math.min(limit, currentX + moveX));
+    currentY = Math.max(-limit, Math.min(limit, currentY + moveY));
+
+    btn.style.left = currentX + 'px';
+    btn.style.top = currentY + 'px';
+}
+
+// runs when cursor enters
+btn.addEventListener('mouseenter', moveButton);
+
+// runs BEFORE click actually happens
+btn.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // stops actual click
+    moveButton();
+});
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuvih8j3jOyxbBOdfkLDh3ShvBHdYMxfg",
+    authDomain: "my-project-47a7c.firebaseapp.com",
+    databaseURL: "https://my-project-47a7c-default-rtdb.firebaseio.com",
+    projectId: "my-project-47a7c",
+    storageBucket: "my-project-47a7c.appspot.com",
+    messagingSenderId: "285580810119",
+    appId: "1:285580810119:web:5805facb5b999e1134a522",
+    measurementId: "G-4YKFF0F1MT"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const yesBtn = document.getElementById("yes-btn");
+  const noBtn = document.getElementById("runaway-btn");
+
+  async function increaseNoCounter() {
+    const attemptsRef = ref(db, "response/noAttempts");
+
+    try {
+      const snapshot = await get(attemptsRef);
+      const currentCount = snapshot.exists() ? snapshot.val() : 0;
+      await set(attemptsRef, currentCount + 1);
+    } catch (error) {
+      console.error("Error updating noAttempts:", error);
+    }
+  }
+
+  yesBtn.addEventListener("click", async () => {
+    try {
+      const attemptsRef = ref(db, "response/noAttempts");
+      const attemptsSnapshot = await get(attemptsRef);
+      const currentAttempts = attemptsSnapshot.exists() ? attemptsSnapshot.val() : 0;
+
+      await set(ref(db, "response"), {
+        answer: "yes",
+        time: Date.now(),
+        noAttempts: currentAttempts
+      });
+
+      alert("Justin a cliqué oui 💖");
+      window.location.href = "flowers.html";
+    } catch (error) {
+      console.error("Error saving yes response:", error);
+    }
+  });
+
+  noBtn.addEventListener("mouseenter", increaseNoCounter);
+  noBtn.addEventListener("mousedown", increaseNoCounter);
+
+  onValue(ref(db, "response"), (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.answer === "yes") {
+      console.log("Justin accepted 💖");
+      console.log("No attempts:", data.noAttempts ?? 0);
+    }
+  });
+</script></body>
+</html>
